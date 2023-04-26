@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<typeAliases> 
+		<typeAlias alias="UserDto" type="com.ds.groupware.dto.UserDto"/> 	
+		<typeAlias alias="DeptDto" type="com.ds.groupware.dto.DeptDto"/> 	
+		<typeAlias alias="HobbyDto" type="com.ds.groupware.dto.HobbyDto"/> 	
+		<typeAlias alias="UHDto" type="com.ds.groupware.dto.UHDto"/> 
+	</typeAliases>
+
+	<mappers>
+	  <mapper resource=	"mapper/user.xml"/>
+	  <mapper resource=	"mapper/dept.xml"/>
+	  <mapper resource=	"mapper/hobby.xml"/>
+	  <mapper resource=	"mapper/uh.xml"/>
+	</mappers>
+	
+</configuration>

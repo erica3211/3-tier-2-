@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="UH">
+	<select id="UH_getList" parameterType="UHDto"
+	resultType="UHDto">
+	select ID, public."UH_TABLE".HOBBY_CD, public."HOBBY".HOBBY_NM
+	from public."UH_TABLE" JOIN public."HOBBY" on public."UH_TABLE".hobby_cd = public."HOBBY".hobby_cd 
+	</select>
+	
+	<select id="UH_getIDhobbynmList" parameterType="UHDto"
+	resultType="UHDto">
+	SELECT hobby_cd FROM public."UH_TABLE" where (id = #{id});
+	</select>
+	
+	<select id="UH_getNAMEhobbynmList" 
+	resultType="map">
+	SELECT public."USER".user_nm, public."HOBBY".hobby_nm
+	FROM public."USER"
+	INNER JOIN public."UH_TABLE" 
+  	ON public."USER".id = public."UH_TABLE".id
+	INNER JOIN public."HOBBY"
+  	ON public."UH_TABLE".hobby_cd = public."HOBBY".hobby_cd
+	</select>
+	
+	<select id="UH_getTotalCnt" parameterType="UHDto"
+	resultType="Integer">
+	select count(*) from public."UH_TABLE"
+	</select>
+	
+	<select id="UH_insert" parameterType="UHDto"
+	resultType="UHDto">
+	INSERT INTO public."UH_TABLE"( id, hobby_cd )
+	VALUES ( 
+		#{id}
+	  , #{hobby_cd}
+	  )
+	</select>
+</mapper>

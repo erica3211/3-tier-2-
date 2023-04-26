@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="User">
+	<select id="User_getList" parameterType="UserDto"
+	resultType="UserDto">
+	select ID, USER_NM, USER_EML_ADDR, public."USER".DEPT_NO, public."DEPT".dept_nm, USER_TELNO, USER_ADDR, APRV_YN
+	from public."USER" JOIN public."DEPT" on public."USER".dept_no = public."DEPT".dept_no  where id like '%'||#{searchKey}||'%' ORDER BY APRV_YN, ID
+	</select>
+	
+	<select id="User_getTotalCnt" parameterType="UserDto"
+	resultType="Integer">
+	select count(*) from public."USER"
+	</select>
+	
+	<select id="User_insert" parameterType="UserDto"
+	resultType="UserDto">
+	INSERT INTO public."USER"(
+	id, user_nm, user_eml_addr, dept_no, user_telno, user_addr)
+	VALUES 		( #{id}
+		, #{user_nm}
+		, #{user_eml_addr}
+		, #{dept_no}
+		, #{user_telno}
+		, #{user_addr}
+		)
+	</select>
+	<select id="User_getView" parameterType="UserDto"
+	resultType="UserDto">
+	select ID, USER_NM, USER_EML_ADDR, public."USER".DEPT_NO, public."DEPT".dept_nm, USER_TELNO, USER_ADDR, APRV_YN
+	from public."USER" JOIN public."DEPT" on public."USER".dept_no = public."DEPT".dept_no where id=#{id}
+	</select>
+	
+	<select id="User_Aprv_Y" parameterType="UserDto"
+	resultType="UserDto">
+	UPDATE public."USER"
+	SET aprv_yn='Y'
+	WHERE id = #{id}
+	</select>
+	
+	<select id="User_delete" parameterType="UserDto"
+	resultType="UserDto">
+	DELETE FROM public."USER"
+	WHERE id = #{id}
+	</select>
+	<select id="User_idcheck" parameterType="UserDto"
+	resultType="Integer">
+	SELECT count(*) FROM public."USER" 
+	WHERE id= #{id}
+	</select>
+	
+</mapper>
