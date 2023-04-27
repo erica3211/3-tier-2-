@@ -3,11 +3,13 @@ package com.ds.groupware.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import com.ds.groupware.dto.DeptDto;
@@ -20,26 +22,22 @@ import com.ds.groupware.service.UHService;
 import com.ds.groupware.service.UserService;
 
 import javax.annotation.Resource;
+import javax.xml.crypto.Data;
 
 //@RestController //json형식으로 가져옴
 @Controller
 public class UserController {
-	@Resource(name = "userService")
-	UserService userservice;
-	@Resource(name = "deptService")
-	DeptService deptservice;
-	@Resource(name = "hobbyService")
-	HobbyService hobbyservice;
-	@Resource(name = "uhService")
-	UHService uhservice;
+	
+	private final RestTemplate restTemplate = new RestTemplate();
+
+
 
 	// 등록 페이지로 이동
 	@RequestMapping(value = "/user/user_write")
 	String user_write(UserDto dto, DeptDto D_dto, UHDto UHdto, HobbyDto H_dto, Model model) {
-		List<DeptDto> deptlist = deptservice.getList(D_dto);
-		List<UserDto> userlist = userservice.getList(dto);
-		List<HobbyDto> hobbylist = hobbyservice.getList(H_dto);
-		//System.out.println(H_dto.getHobby_cd());
+		List<Data> userlist = restTemplate.getForObject("http://localhost:8081/api/userlist", List.class);
+		List<Data> deptlist = restTemplate.getForObject("http://localhost:8081/api/deptlist", List.class);
+		List<Data> hobbylist = restTemplate.getForObject("http://localhost:8081/api/hobbylist", List.class);
 		UserDto userdto = new UserDto();
 		UHDto uhdto = new UHDto();
 		//System.out.println(userlist.get(1).getId());
@@ -61,7 +59,7 @@ public class UserController {
 			return "redirect:/user/user_write";
 		}
 		System.out.println(dto.getId());
-		userservice.insert(dto);
+		restTemplate.postForObject("http://localhost:8081/api/user_save", dto, UserDto.class);
 		if(uhdto.getHobby_cd().equals("")) {
 			uhdto.setHobby_cd("f");
 		}
@@ -72,13 +70,13 @@ public class UserController {
 		System.out.println(uhlist);
 		System.out.println(uhlist.length());
 		if (uhlist.length() == 1) {
-			uhservice.insert(uhdto);
+			restTemplate.postForObject("http://localhost:8081/api/uh_save", uhdto, UHDto.class);
 		} else {
 			String[] uhlist2 = uhlist.split(",");
 			for (int i = 0; i < uhlist2.length; i++) {
 				System.out.println(uhlist2[i]);
 				uhdto.setHobby_cd(uhlist2[i]);
-				uhservice.insert(uhdto);
+				restTemplate.postForObject("http://localhost:8081/api/uh_save", uhdto, UHDto.class);
 			}
 		}
 		return "redirect:/";
@@ -88,10 +86,12 @@ public class UserController {
 	@ResponseBody
 	@RequestMapping(value = "/user/idcheck")
 	HashMap<String, Object> idcheck(UserDto dto) {
-		HashMap<String, Object> map = new HashMap<>();
-		System.out.println(userservice.getIdCheck(dto));
-		map.put("result",userservice.getIdCheck(dto));
-		return map;
+		// bt 프로젝트에서 getIdCheck() 호출
+		Boolean result = restTemplate.postForObject("http://localhost:8081/api/idcheck", dto, Boolean.class);
+		// 결과값을 hashmap에 넣어서 반환
+		HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("result", result);
+        return map;
 	}
 
 

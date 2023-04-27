@@ -11,9 +11,7 @@ import javax.annotation.Resource;
 
 @Controller 
 public class HomeController {
-	@Resource(name = "uhService")
-	UHService uhservice;
-	
+
 	// 홈화면
 	@GetMapping("/")
 	public String index() {
