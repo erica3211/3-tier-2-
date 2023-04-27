@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,29 +36,27 @@ public class AdminController {
 
 	// 관리자 기본화면
 	@RequestMapping(value = "/admin")
-	public String getList(Model model) {
+	public String getList(UserDto dto, Model model) {
 		
-		List<Data> userlist = restTemplate.getForObject("http://localhost:8081/api/userlist", List.class);
 		int total = restTemplate.getForObject("http://localhost:8081/api/total", Integer.class);
-		String searchkey = restTemplate.getForObject("http://localhost:8081/api/searchkey", String.class);
+		String searchKey = dto.getSearchKey();
+		String schuri = "http://localhost:8081/api/userlist?searchKey="+searchKey; 
+		List<UserDto> userlist = restTemplate.getForObject(schuri, List.class);
 		model.addAttribute("getUserList", userlist);
 		model.addAttribute("getTotalCnt", total);
-		model.addAttribute("searchKey", searchkey);
-		System.out.println("pt1:"+searchkey);
+		model.addAttribute("searchKey", searchKey);
 		return "admin";
 	}
 
 	//사용자 상세화면
 		@RequestMapping(value = "/admin/{user_id}")
-		public String getView(@PathVariable String user_id,UserDto dto, Model model) {
-			
-			List<Data> userlist = restTemplate.getForObject("http://localhost:8081/api/userlist", List.class);
+		public String getView(@PathVariable String user_id,UserDto dto,UHDto uhdto, DeptDto deptdto, Model model) {
+			String searchKey = dto.getSearchKey();
+			String schuri = "http://localhost:8081/api/userlist?searchKey="+searchKey; 
+			List<UserDto> userlist = restTemplate.getForObject(schuri, List.class);
 			List<Data> deptlist = restTemplate.getForObject("http://localhost:8081/api/deptlist", List.class);
 			List<Data> hobbylist = restTemplate.getForObject("http://localhost:8081/api/hobbylist", List.class);
-			List<Data> uh = restTemplate.getForObject("http://localhost:8081/api/uh", List.class);
-			String searchkey = restTemplate.getForObject("http://localhost:8081/api/searchkey", String.class);
 			System.out.println("userid="+user_id);
-			System.out.println(user_id+"의 hobbylist="+uh);
 			
 			URI uri = UriComponentsBuilder
 					.fromUriString("http://localhost:8081")
@@ -69,12 +68,16 @@ public class AdminController {
 					
 			UserDto userview = restTemplate.getForObject(uri, UserDto.class);
 			
+			String uri2 = "http://localhost:8081/api/uh?user_id=" + user_id; // bt 서버의 URI로 설정
+			String uh = restTemplate.getForObject(uri2, String.class);
+			System.out.println(user_id+"의 hobbylist="+uh);
+
 			model.addAttribute("getDeptList", deptlist);
 			model.addAttribute("getUserList", userlist);
 			model.addAttribute("getHobbyList", hobbylist);
 			model.addAttribute("getView", userview);
 			model.addAttribute("getUHlist", uh);
-			model.addAttribute("searchKey", searchkey);
+			model.addAttribute("searchKey", searchKey);
 			return "admin";
 		}
 
