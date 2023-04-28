@@ -1,101 +1,58 @@
 package com.ds.groupware.controller;
 
-import java.net.URI;
-import java.util.List;
 
 import javax.annotation.Resource;
-import javax.xml.crypto.Data;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ds.groupware.dto.DeptDto;
 import com.ds.groupware.dto.HobbyDto;
 import com.ds.groupware.dto.UHDto;
 import com.ds.groupware.dto.UserDto;
-import com.ds.groupware.service.DeptService;
-import com.ds.groupware.service.HobbyService;
-import com.ds.groupware.service.UHService;
-import com.ds.groupware.service.UserService;
+import com.ds.groupware.service.APIService;
 
 
 
 @Controller
 public class AdminController {
+	@Resource(name = "apiservice")
+	APIService service;
 	
-	private final RestTemplate restTemplate = new RestTemplate();
-
 
 	// 관리자 기본화면
 	@RequestMapping(value = "/admin")
 	public String getList(UserDto dto, Model model) {
-		
-		int total = restTemplate.getForObject("http://localhost:8081/api/total", Integer.class);
-		String searchKey = dto.getSearchKey();
-		String schuri = "http://localhost:8081/api/userlist?searchKey="+searchKey; 
-		List<UserDto> userlist = restTemplate.getForObject(schuri, List.class);
-		model.addAttribute("getUserList", userlist);
-		model.addAttribute("getTotalCnt", total);
-		model.addAttribute("searchKey", searchKey);
+		model.addAttribute("getUserList", service.getUserList(dto));
+		model.addAttribute("searchKey", service.getsearchKey(dto));
 		return "admin";
 	}
 
 	//사용자 상세화면
 		@RequestMapping(value = "/admin/{user_id}")
-		public String getView(@PathVariable String user_id,UserDto dto,UHDto uhdto, DeptDto deptdto, Model model) {
-			String searchKey = dto.getSearchKey();
-			String schuri = "http://localhost:8081/api/userlist?searchKey="+searchKey; 
-			List<UserDto> userlist = restTemplate.getForObject(schuri, List.class);
-			List<Data> deptlist = restTemplate.getForObject("http://localhost:8081/api/deptlist", List.class);
-			List<Data> hobbylist = restTemplate.getForObject("http://localhost:8081/api/hobbylist", List.class);
-			System.out.println("userid="+user_id);
-			
-			URI uri = UriComponentsBuilder
-					.fromUriString("http://localhost:8081")
-					.path("/api/userview")
-					.queryParam("user_id", user_id)
-					.encode()
-					.build()
-					.toUri();
-					
-			UserDto userview = restTemplate.getForObject(uri, UserDto.class);
-			
-			String uri2 = "http://localhost:8081/api/uh?user_id=" + user_id; // bt 서버의 URI로 설정
-			String uh = restTemplate.getForObject(uri2, String.class);
-			System.out.println(user_id+"의 hobbylist="+uh);
-
-			model.addAttribute("getDeptList", deptlist);
-			model.addAttribute("getUserList", userlist);
-			model.addAttribute("getHobbyList", hobbylist);
-			model.addAttribute("getView", userview);
-			model.addAttribute("getUHlist", uh);
-			model.addAttribute("searchKey", searchKey);
+		public String getView(@PathVariable String user_id,HobbyDto hobbydto, UserDto dto,UHDto uhdto, DeptDto deptdto, Model model) {
+			model.addAttribute("getDeptList", service.getDeptList(deptdto));
+			model.addAttribute("getUserList", service.getUserList(dto));
+			model.addAttribute("getHobbyList", service.getHobbyList(hobbydto));
+			model.addAttribute("getView",service.getUserview(user_id, dto));
+			model.addAttribute("getUHlist", service.getUHList(user_id, uhdto));
+			model.addAttribute("searchKey", service.getsearchKey(dto));
 			return "admin";
 		}
 
 		// 회원 등록 (승인요청 -> 승인)
 		@RequestMapping(value = "/user_update/{user_id}")
 		String user_aprv_y(@PathVariable String user_id, UserDto dto) {
-			String updateUrl = "http://localhost:8081/api/user_update/" + user_id; // bt 서버의 URI로 설정
-			restTemplate.postForObject(updateUrl, dto, UserDto.class);
-			System.out.println("등록완료");
+			service.user_aprv_y(user_id, dto);
 			return "redirect:/admin";
 		}
 
 		// 회원 삭제
 		@RequestMapping(value = "/user_delete/{user_id}")
 		String user_delete(@PathVariable String user_id) {
-			String deleteUrl = "http://localhost:8081/api/user_delete/" + user_id; // bt 서버의 URI로 설정
-			restTemplate.delete(deleteUrl);
-			System.out.println("삭제완료");
+			service.user_delete(user_id);
 			return "redirect:/admin";
 		}
 
