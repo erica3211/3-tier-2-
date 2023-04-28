@@ -4,7 +4,7 @@ spring:
    driver-class-name: org.postgresql.Driver
    url: jdbc:postgresql://34.64.155.49:5432/postgres
    username: postgres
-   password: 1234
+   password: ”moon1234”
  thymeleaf:
     suffix: .html
     prefix: classpath:/templates/
